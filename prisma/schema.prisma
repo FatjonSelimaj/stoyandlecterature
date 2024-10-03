@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  title           String           @unique
+  content         String
+  category        String
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+}
+
+model Author {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String       @unique
+  biography     String?
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  works         Work[]       // One-to-many relationship with Work
+  literatures   Literature[] // One-to-many relationship with Literature
+}
+
+model Work {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  genre         String
+  authorId      String?      @db.ObjectId
+  author        Author?      @relation(fields: [authorId], references: [id])
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  literatures   Literature[] // One-to-many relationship with Literature
+}
+
+model Literature {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  authorId       String?      @db.ObjectId
+  workId         String?      @db.ObjectId
+  author         Author?      @relation(fields: [authorId], references: [id])
+  work           Work?        @relation(fields: [workId], references: [id])
+  createdAt      DateTime     @default(now()) @map("created_at")
+}
+
+model HistorySection {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  title           String    // Titolo della sezione storica
+  description     String    // Descrizione della sezione storica
+  historicalPeriod String    // Periodo storico, ad esempio "Medioevo" o "Rinascimento"
+  createdAt       DateTime  @default(now())  // Data di creazione
+  updatedAt       DateTime  @updatedAt       // Data di aggiornamento
+}
+
