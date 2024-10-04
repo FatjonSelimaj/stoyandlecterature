@@ -14,6 +14,11 @@ app.use(cors());
 // Middleware per gestire le richieste JSON
 app.use(express.json());
 
+// Aggiungi una rotta di base per verificare che il server funzioni
+app.get('/', (req, res) => {
+  res.send('Benvenuto al backend di Storia e Letteratura!');
+});
+
 // Usa le rotte degli articoli
 app.use('/api', articleRoutes);
 
@@ -29,6 +34,10 @@ app.use('/api', literatureRoutes);
 // Usa le rotte delle sezioni storiche
 app.use('/api', historySectionRoutes);
 
+// Gestisci le rotte non trovate (404)
+app.use((req, res) => {
+  res.status(404).send('Errore 404: Risorsa non trovata');
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
