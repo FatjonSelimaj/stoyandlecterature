@@ -5,17 +5,16 @@ const prisma = new PrismaClient();
 
 // Crea una nuova opera senza immagini
 export const createWork = async (req: Request, res: Response): Promise<Response> => {
-    const { title, genre, authorId } = req.body;
+    const { title, genre, authorId, links } = req.body;  // Aggiungi i link nel corpo della richiesta
 
     try {
-        // Controlla se esiste già un'opera con lo stesso titolo
         const existingWork = await prisma.work.findFirst({ where: { title } });
         if (existingWork) {
             return res.status(409).json({ error: 'Work with this title already exists.' });
         }
 
         const work = await prisma.work.create({
-            data: { title, genre, authorId }
+            data: { title, genre, authorId, links }  // Salva i link nel database
         });
 
         return res.status(201).json(work);
@@ -74,12 +73,12 @@ export const getWorkById = async (req: Request, res: Response): Promise<Response
 // Aggiorna un'opera per ID senza immagini
 export const updateWork = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
-    const { title, genre, authorId } = req.body;
+    const { title, genre, authorId, links } = req.body;  // Aggiungi i link nell'input
 
     try {
         const work = await prisma.work.update({
             where: { id },
-            data: { title, genre, authorId },
+            data: { title, genre, authorId, links },  // Aggiorna i link nel database
         });
 
         return res.status(200).json(work);
