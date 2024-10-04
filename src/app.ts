@@ -1,5 +1,4 @@
 import express from 'express';
-import axios from 'axios';
 import cors from 'cors';
 import articleRoutes from './routes/articleRoutes';
 import authorRoutes from './routes/authorRoutes';
