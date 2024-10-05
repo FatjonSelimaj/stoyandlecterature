@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Aggiungi una rotta di base per verificare che il server funzioni
 app.get('/', (req, res) => {
-  res.send('Benvenuto al backend di Storia e Letteratura!');
+  res.send('Backend attivo');
 });
 
 // Usa le rotte degli articoli
