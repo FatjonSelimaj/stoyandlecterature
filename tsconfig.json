@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
+    "target": "es2020",  // Compila per ES2020, va bene per la maggior parte degli ambienti moderni
+    "module": "commonjs",  // Compatibile con Node.js
+    "outDir": "./dist",  // La cartella dove verranno salvati i file JavaScript compilati
+    "rootDir": "./src",  // Il percorso della cartella sorgente TypeScript
+    "strict": true,  // Abilita la modalità rigorosa di TypeScript
+    "esModuleInterop": true,  // Interoperabilità tra CommonJS e moduli ES
+    "skipLibCheck": true  // Salta il controllo delle definizioni dei tipi per migliorare la velocità di compilazione
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],  // Includi tutti i file TypeScript nella cartella src
+  "exclude": ["node_modules"]  // Escludi la cartella node_modules dalla compilazione
 }
