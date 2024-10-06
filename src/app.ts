@@ -39,5 +39,4 @@ app.use((req, res) => {
   res.status(404).send('Errore 404: Risorsa non trovata');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+export default app;
