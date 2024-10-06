@@ -38,5 +38,3 @@ app.use('/api', historySectionRoutes);
 app.use((req, res) => {
   res.status(404).send('Errore 404: Risorsa non trovata');
 });
-
-export default app;
