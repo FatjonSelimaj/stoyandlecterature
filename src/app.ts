@@ -8,35 +8,28 @@ import historySectionRoutes from './routes/historySectionRoutes';
 
 const fastify = Fastify();
 
-async function startServer() {
-    // Abilita CORS per tutte le richieste
-    try {
-        await fastify.register(cors);
+// Abilita CORS per tutte le richieste
+fastify.register(cors);
 
-        // Aggiungi una rotta di base per verificare che il server funzioni
-        fastify.get('/', async (request, reply) => {
-            reply.send('Backend attivo');
-        });
+// Aggiungi una rotta di base per verificare che il server funzioni
+fastify.get('/', async (request, reply) => {
+    reply.send('Backend attivo');
+});
 
-        // Registra le rotte
-        fastify.register(articleRoutes, { prefix: '/api' });
-        fastify.register(authorRoutes, { prefix: '/api' });
-        fastify.register(workRoutes, { prefix: '/api' });
-        fastify.register(literatureRoutes, { prefix: '/api' });
-        fastify.register(historySectionRoutes, { prefix: '/api' });
+// Registra le rotte
+fastify.register(articleRoutes, { prefix: '/api' });
+fastify.register(authorRoutes, { prefix: '/api' });
+fastify.register(workRoutes, { prefix: '/api' });
+fastify.register(literatureRoutes, { prefix: '/api' });
+fastify.register(historySectionRoutes, { prefix: '/api' });
 
-        // Gestisci le rotte non trovate (404)
-        fastify.setNotFoundHandler((request, reply) => {
-            reply.status(404).send('Errore 404: Risorsa non trovata');
-        });
+// Gestisci le rotte non trovate (404)
+fastify.setNotFoundHandler((request, reply) => {
+    reply.status(404).send('Errore 404: Risorsa non trovata');
+});
 
-        // Avvia il server Fastify
-        const address = await fastify.listen({ port: 5000 });
-        console.log(`Server running on ${address}`);
-    } catch (err) {
-        fastify.log.error(err);
-        process.exit(1);
-    }
-}
-
-startServer();
+// Esporta la funzione handler per Vercel
+export default async (req: any, res: any) => {
+    await fastify.ready();
+    fastify.server.emit('request', req, res);
+};
