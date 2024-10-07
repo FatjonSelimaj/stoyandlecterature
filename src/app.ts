@@ -1,42 +1,42 @@
-import express from 'express';
-import cors from 'cors';
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import articleRoutes from './routes/articleRoutes';
 import authorRoutes from './routes/authorRoutes';
 import workRoutes from './routes/workRoutes';
 import literatureRoutes from './routes/literatureRoutes';
 import historySectionRoutes from './routes/historySectionRoutes';
 
-const app = express();
+const fastify = Fastify();
 
-// Abilita CORS per tutte le richieste
-app.use(cors());
+async function startServer() {
+    // Abilita CORS per tutte le richieste
+    try {
+        await fastify.register(cors);
 
-// Middleware per gestire le richieste JSON
-app.use(express.json());
+        // Aggiungi una rotta di base per verificare che il server funzioni
+        fastify.get('/', async (request, reply) => {
+            reply.send('Backend attivo');
+        });
 
-// Aggiungi una rotta di base per verificare che il server funzioni
-app.get('/', (req, res) => {
-  res.send('Backend attivo');
-});
+        // Registra le rotte
+        fastify.register(articleRoutes, { prefix: '/api' });
+        fastify.register(authorRoutes, { prefix: '/api' });
+        fastify.register(workRoutes, { prefix: '/api' });
+        fastify.register(literatureRoutes, { prefix: '/api' });
+        fastify.register(historySectionRoutes, { prefix: '/api' });
 
-// Usa le rotte degli articoli
-app.use('/api', articleRoutes);
+        // Gestisci le rotte non trovate (404)
+        fastify.setNotFoundHandler((request, reply) => {
+            reply.status(404).send('Errore 404: Risorsa non trovata');
+        });
 
-// Usa le rotte degli autori
-app.use('/api', authorRoutes);
+        // Avvia il server Fastify
+        const address = await fastify.listen({ port: 5000 });
+        console.log(`Server running on ${address}`);
+    } catch (err) {
+        fastify.log.error(err);
+        process.exit(1);
+    }
+}
 
-// Usa le rotte delle opere
-app.use('/api', workRoutes);
-
-// Usa le rotte delle relazioni letterarie
-app.use('/api', literatureRoutes);
-
-// Usa le rotte delle sezioni storiche
-app.use('/api', historySectionRoutes);
-
-// Gestisci le rotte non trovate (404)
-app.use((req, res) => {
-  res.status(404).send('Errore 404: Risorsa non trovata');
-});
-
-
+startServer();

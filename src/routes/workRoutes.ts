@@ -1,27 +1,40 @@
-import { Router } from 'express';
-import {
-    createWork,
-    getWorks,
-    getWorkById,
-    updateWork,
-    deleteWork,
-} from '../controllers/workController';
+import { createWork, deleteWork, getWorkById, getWorks, updateWork } from '../controllers/workController';
+import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from 'fastify';
 
-const router = Router();
+interface WorkParams {
+  id: string;
+}
 
-// Rotta per creare una nuova opera senza immagini
-router.post('/works', createWork);
+interface WorkBody {
+  title: string;
+  genre: string;
+  authorId: string | null;
+  links: string[];
+}
 
-// Rotta per ottenere tutte le opere
-router.get('/works', getWorks);
+export default async function workRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
+  // Rotta per creare una nuova opera senza immagini
+  fastify.post('/works', async (request: FastifyRequest<{ Body: WorkBody }>, reply: FastifyReply) => {
+    return createWork(request, reply);
+  });
 
-// Rotta per ottenere un'opera specifica per ID
-router.get('/works/:id', getWorkById);
+  // Rotta per ottenere tutte le opere
+  fastify.get('/works', async (request: FastifyRequest, reply: FastifyReply) => {
+    return getWorks(request, reply);
+  });
 
-// Rotta per aggiornare un'opera specifica per ID senza immagini
-router.put('/works/:id', updateWork);
+  // Rotta per ottenere un'opera specifica per ID
+  fastify.get('/works/:id', async (request: FastifyRequest<{ Params: WorkParams }>, reply: FastifyReply) => {
+    return getWorkById(request, reply);
+  });
 
-// Rotta per eliminare un'opera specifica per ID
-router.delete('/works/:id', deleteWork);
+  // Rotta per aggiornare un'opera specifica per ID senza immagini
+  fastify.put('/works/:id', async (request: FastifyRequest<{ Params: WorkParams; Body: WorkBody }>, reply: FastifyReply) => {
+    return updateWork(request, reply);
+  });
 
-export default router;
+  // Rotta per eliminare un'opera specifica per ID
+  fastify.delete('/works/:id', async (request: FastifyRequest<{ Params: WorkParams }>, reply: FastifyReply) => {
+    return deleteWork(request, reply);
+  });
+}

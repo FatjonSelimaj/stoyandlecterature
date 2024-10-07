@@ -8,51 +8,50 @@ datasource db {
 }
 
 model Article {
-  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  id              String           @id @default(auto()) @db.ObjectId @map("_id")
   title           String           @unique
   content         String
   category        String
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model Author {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  id            String       @id @default(auto()) @db.ObjectId @map("_id")
   name          String       @unique
   biography     String?
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  works         Work[]       // One-to-many relationship with Work
-  literatures   Literature[] // One-to-many relationship with Literature
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  works         Work[]       @relation("AuthorWorks")    // Relazione uno-a-molti con Work
+  literatures   Literature[] @relation("AuthorLiterature") // Relazione uno-a-molti con Literature
 }
 
 model Work {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  id            String       @id @default(auto()) @db.ObjectId @map("_id")
   title         String
   genre         String
   authorId      String?      @db.ObjectId
   links         String[] 
-  author        Author?      @relation(fields: [authorId], references: [id])
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  literatures   Literature[] // One-to-many relationship with Literature
+  author        Author?      @relation(fields: [authorId], references: [id], name: "AuthorWorks")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  literatures   Literature[] @relation("WorkLiterature")  // Relazione uno-a-molti con Literature
 }
 
 model Literature {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  id             String       @id @default(auto()) @db.ObjectId @map("_id")
   authorId       String?      @db.ObjectId
   workId         String?      @db.ObjectId
-  author         Author?      @relation(fields: [authorId], references: [id])
-  work           Work?        @relation(fields: [workId], references: [id])
-  createdAt      DateTime     @default(now()) @map("created_at")
+  author         Author?      @relation(fields: [authorId], references: [id], name: "AuthorLiterature")
+  work           Work?        @relation(fields: [workId], references: [id], name: "WorkLiterature")
+  createdAt      DateTime     @default(now())
 }
 
 model HistorySection {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  id              String    @id @default(auto()) @db.ObjectId @map("_id")
   title           String    // Titolo della sezione storica
   description     String    // Descrizione della sezione storica
-  historicalPeriod String    // Periodo storico, ad esempio "Medioevo" o "Rinascimento"
+  historicalPeriod String   // Periodo storico, ad esempio "Medioevo" o "Rinascimento"
   createdAt       DateTime  @default(now())  // Data di creazione
   updatedAt       DateTime  @updatedAt       // Data di aggiornamento
 }
-

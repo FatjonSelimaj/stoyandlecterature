@@ -1,16 +1,26 @@
 import { PrismaClient } from '@prisma/client';
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 const prisma = new PrismaClient();
 
+// Definisci l'interfaccia per il corpo della richiesta
+interface HistorySectionBody {
+    title: string;
+    description: string;
+    historicalPeriod: string;
+}
+
 // Crea una nuova sezione storica con titolo, descrizione e periodo storico
-export const createHistorySection = async (req: Request, res: Response) => {
+export const createHistorySection = async (
+    request: FastifyRequest<{ Body: HistorySectionBody }>, 
+    reply: FastifyReply
+) => {
     try {
-        const { title, description, historicalPeriod } = req.body;
+        const { title, description, historicalPeriod } = request.body;
 
         // Verifica che tutti i campi richiesti siano presenti
         if (!title || !description || !historicalPeriod) {
-            return res.status(400).json({ error: 'All fields are required: title, description, and historicalPeriod' });
+            return reply.status(400).send({ error: 'All fields are required: title, description, and historicalPeriod' });
         }
 
         // Crea la nuova sezione storica
@@ -23,15 +33,18 @@ export const createHistorySection = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(201).json(historySection);
+        reply.status(201).send(historySection);
     } catch (error) {
         console.error('Error creating history section:', error);
-        res.status(500).json({ error: 'Failed to create history section' });
+        reply.status(500).send({ error: 'Failed to create history section' });
     }
 };
 
 // Ottieni tutte le sezioni storiche
-export const getHistorySections = async (_req: Request, res: Response) => {
+export const getHistorySections = async (
+    request: FastifyRequest, 
+    reply: FastifyReply
+) => {
     try {
         const historySections = await prisma.historySection.findMany({
             orderBy: {
@@ -39,41 +52,47 @@ export const getHistorySections = async (_req: Request, res: Response) => {
             },
         });
 
-        res.status(200).json(historySections);
+        reply.status(200).send(historySections);
     } catch (error) {
         console.error('Error fetching history sections:', error);
-        res.status(500).json({ error: 'Failed to fetch history sections' });
+        reply.status(500).send({ error: 'Failed to fetch history sections' });
     }
 };
 
 // Ottieni una sezione storica per ID
-export const getHistorySectionById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const getHistorySectionById = async (
+    request: FastifyRequest<{ Params: { id: string } }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
     try {
         const historySection = await prisma.historySection.findUnique({
             where: { id },
         });
 
         if (!historySection) {
-            return res.status(404).json({ error: 'History section not found' });
+            return reply.status(404).send({ error: 'History section not found' });
         }
 
-        res.status(200).json(historySection);
+        reply.status(200).send(historySection);
     } catch (error) {
         console.error('Error fetching history section by ID:', error);
-        res.status(500).json({ error: 'Failed to fetch history section' });
+        reply.status(500).send({ error: 'Failed to fetch history section' });
     }
 };
 
 // Aggiorna una sezione storica per ID
-export const updateHistorySection = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { title, description, historicalPeriod } = req.body;
+export const updateHistorySection = async (
+    request: FastifyRequest<{ Params: { id: string }; Body: HistorySectionBody }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
+    const { title, description, historicalPeriod } = request.body;
 
     try {
         // Verifica che tutti i campi richiesti siano presenti
         if (!title || !description || !historicalPeriod) {
-            return res.status(400).json({ error: 'All fields are required: title, description, and historicalPeriod' });
+            return reply.status(400).send({ error: 'All fields are required: title, description, and historicalPeriod' });
         }
 
         const historySection = await prisma.historySection.update({
@@ -85,25 +104,28 @@ export const updateHistorySection = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(200).json(historySection);
+        reply.status(200).send(historySection);
     } catch (error) {
         console.error('Error updating history section:', error);
-        res.status(500).json({ error: 'Failed to update history section' });
+        reply.status(500).send({ error: 'Failed to update history section' });
     }
 };
 
 // Elimina una sezione storica per ID
-export const deleteHistorySection = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const deleteHistorySection = async (
+    request: FastifyRequest<{ Params: { id: string } }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
 
     try {
         await prisma.historySection.delete({
             where: { id },
         });
 
-        res.status(204).send();  // Restituisce 204 (No Content) per successo
+        reply.status(204).send();  // Restituisce 204 (No Content) per successo
     } catch (error) {
         console.error('Error deleting history section:', error);
-        res.status(500).json({ error: 'Failed to delete history section' });
+        reply.status(500).send({ error: 'Failed to delete history section' });
     }
 };

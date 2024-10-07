@@ -1,12 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 const prisma = new PrismaClient();
 
+// Definisci l'interfaccia per il corpo della richiesta
+interface LiteratureBody {
+    authorId: string;
+    workId: string;
+}
+
 // Crea una nuova relazione letteraria senza immagini
-export const createLiterature = async (req: Request, res: Response) => {
+export const createLiterature = async (
+    request: FastifyRequest<{ Body: LiteratureBody }>, 
+    reply: FastifyReply
+) => {
     try {
-        const { authorId, workId } = req.body;
+        const { authorId, workId } = request.body;
 
         // Verifica se esiste già la relazione letteraria per evitare duplicati
         const existingLiterature = await prisma.literature.findFirst({
@@ -14,7 +23,7 @@ export const createLiterature = async (req: Request, res: Response) => {
         });
 
         if (existingLiterature) {
-            return res.status(409).json({ error: 'This literature entry already exists' });
+            return reply.status(409).send({ error: 'This literature entry already exists' });
         }
 
         const literature = await prisma.literature.create({
@@ -24,15 +33,18 @@ export const createLiterature = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(201).json(literature);
+        reply.status(201).send(literature);
     } catch (error) {
         console.error('Error creating literature:', error);
-        res.status(400).json({ error: 'Failed to create literature' });
+        reply.status(400).send({ error: 'Failed to create literature' });
     }
 };
 
 // Recupera tutte le relazioni letterarie
-export const getLiteratures = async (_req: Request, res: Response) => {
+export const getLiteratures = async (
+    request: FastifyRequest, 
+    reply: FastifyReply
+) => {
     try {
         const literatures = await prisma.literature.findMany({
             where: {
@@ -50,16 +62,19 @@ export const getLiteratures = async (_req: Request, res: Response) => {
             },
         });
 
-        res.status(200).json(literatures);
+        reply.status(200).send(literatures);
     } catch (error) {
         console.error('Error fetching literatures:', error);
-        res.status(500).json({ error: 'Failed to fetch literatures' });
+        reply.status(500).send({ error: 'Failed to fetch literatures' });
     }
 };
 
 // Recupera una singola relazione letteraria per ID
-export const getLiteratureById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const getLiteratureById = async (
+    request: FastifyRequest<{ Params: { id: string } }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
     try {
         const literature = await prisma.literature.findUnique({
             where: { id },
@@ -70,20 +85,23 @@ export const getLiteratureById = async (req: Request, res: Response) => {
         });
 
         if (!literature) {
-            return res.status(404).json({ error: 'Literature not found' });
+            return reply.status(404).send({ error: 'Literature not found' });
         }
 
-        res.status(200).json(literature);
+        reply.status(200).send(literature);
     } catch (error) {
         console.error('Error fetching literature:', error);
-        res.status(500).json({ error: 'Failed to fetch literature' });
+        reply.status(500).send({ error: 'Failed to fetch literature' });
     }
 };
 
 // Aggiorna una relazione letteraria per ID senza immagini
-export const updateLiterature = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { authorId, workId } = req.body;
+export const updateLiterature = async (
+    request: FastifyRequest<{ Params: { id: string }; Body: LiteratureBody }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
+    const { authorId, workId } = request.body;
 
     try {
         const literature = await prisma.literature.update({
@@ -94,24 +112,27 @@ export const updateLiterature = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(200).json(literature);
+        reply.status(200).send(literature);
     } catch (error) {
         console.error('Error updating literature:', error);
-        res.status(400).json({ error: 'Failed to update literature' });
+        reply.status(400).send({ error: 'Failed to update literature' });
     }
 };
 
 // Elimina una relazione letteraria per ID
-export const deleteLiterature = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const deleteLiterature = async (
+    request: FastifyRequest<{ Params: { id: string } }>, 
+    reply: FastifyReply
+) => {
+    const { id } = request.params;
     try {
         await prisma.literature.delete({
             where: { id },
         });
 
-        res.status(204).send();
+        reply.status(204).send();
     } catch (error) {
         console.error('Error deleting literature:', error);
-        res.status(500).json({ error: 'Failed to delete literature' });
+        reply.status(500).send({ error: 'Failed to delete literature' });
     }
 };

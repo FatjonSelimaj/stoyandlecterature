@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 const prisma = new PrismaClient();
 
 // Creare un articolo senza immagini
-export const createArticle = async (req: Request, res: Response): Promise<Response> => {
-    const { title, content, category } = req.body;
+export const createArticle = async (request: FastifyRequest<{ Body: { title: string; content: string; category: string } }>, reply: FastifyReply) => {
+    const { title, content, category } = request.body;
 
     try {
         // Controlla se l'articolo con lo stesso titolo esiste già
@@ -14,7 +14,7 @@ export const createArticle = async (req: Request, res: Response): Promise<Respon
         });
 
         if (existingArticle) {
-            return res.status(409).json({ error: 'Article with this title already exists' });
+            return reply.status(409).send({ error: 'Article with this title already exists' });
         }
 
         // Creazione dell'articolo senza gestire immagini
@@ -26,47 +26,47 @@ export const createArticle = async (req: Request, res: Response): Promise<Respon
             },
         });
 
-        return res.status(201).json(article);
+        return reply.status(201).send(article);
     } catch (error) {
         console.error('Error creating article:', error);
-        return res.status(400).json({ error: 'Failed to create article' });
+        return reply.status(400).send({ error: 'Failed to create article' });
     }
 };
 
 // Recuperare tutti gli articoli
-export const getArticles = async (req: Request, res: Response) => {
+export const getArticles = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
         const articles = await prisma.article.findMany({
             orderBy: { createdAt: 'desc' },
         });
 
-        res.status(200).json(articles);
+        reply.status(200).send(articles);
     } catch (error) {
         console.error('Error fetching articles:', error);
-        res.status(500).json({ error: 'Failed to fetch articles' });
+        reply.status(500).send({ error: 'Failed to fetch articles' });
     }
 };
 
 // Recuperare articoli per categoria
-export const getArticlesByCategory = async (req: Request, res: Response) => {
-    const { category } = req.params;
+export const getArticlesByCategory = async (request: FastifyRequest<{ Params: { category: string } }>, reply: FastifyReply) => {
+    const { category } = request.params;
     try {
         const articles = await prisma.article.findMany({
             where: { category },
             orderBy: { createdAt: 'desc' },
         });
 
-        res.status(200).json(articles);
+        reply.status(200).send(articles);
     } catch (error) {
         console.error('Error fetching articles by category:', error);
-        res.status(500).json({ error: 'Failed to fetch articles' });
+        reply.status(500).send({ error: 'Failed to fetch articles' });
     }
 };
 
 // Aggiornare un articolo senza immagini
-export const updateArticle = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.params;
-    const { title, content, category } = req.body;
+export const updateArticle = async (request: FastifyRequest<{ Params: { id: string }; Body: { title: string; content: string; category: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    const { title, content, category } = request.body;
 
     try {
         const article = await prisma.article.update({
@@ -78,31 +78,31 @@ export const updateArticle = async (req: Request, res: Response): Promise<Respon
             },
         });
 
-        return res.status(200).json(article);
+        return reply.status(200).send(article);
     } catch (error) {
         console.error('Error updating article:', error);
-        return res.status(500).json({ error: 'Failed to update article' });
+        return reply.status(500).send({ error: 'Failed to update article' });
     }
 };
 
 // Eliminare un articolo
-export const deleteArticle = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const deleteArticle = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
     try {
         await prisma.article.delete({
             where: { id },
         });
 
-        res.status(204).send();  // Nessun contenuto, operazione avvenuta con successo
+        reply.status(204).send();  // Nessun contenuto, operazione avvenuta con successo
     } catch (error) {
         console.error('Error deleting article:', error);
-        res.status(500).send('Failed to delete article');
+        reply.status(500).send('Failed to delete article');
     }
 };
 
 // Recuperare un singolo articolo per ID
-export const getArticleById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const getArticleById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
     try {
         const article = await prisma.article.findUnique({
             where: { id },
@@ -110,13 +110,12 @@ export const getArticleById = async (req: Request, res: Response) => {
 
         // Restituisci un errore 404 se l'articolo non viene trovato
         if (!article) {
-            return res.status(404).json({ error: 'Article not found' });
+            return reply.status(404).send({ error: 'Article not found' });
         }
 
-        res.status(200).json(article);
+        reply.status(200).send(article);
     } catch (error) {
         console.error('Error fetching article:', error);
-        res.status(500).json({ error: 'Failed to fetch article' });
+        reply.status(500).send({ error: 'Failed to fetch article' });
     }
 };
-
