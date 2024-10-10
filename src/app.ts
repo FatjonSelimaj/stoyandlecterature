@@ -1,35 +1,44 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
+import express from 'express';
+import cors from 'cors';
 import articleRoutes from './routes/articleRoutes';
 import authorRoutes from './routes/authorRoutes';
 import workRoutes from './routes/workRoutes';
 import literatureRoutes from './routes/literatureRoutes';
 import historySectionRoutes from './routes/historySectionRoutes';
 
-const fastify = Fastify();
+const app = express();
 
 // Abilita CORS per tutte le richieste
-fastify.register(cors);
+app.use(cors());
+
+// Middleware per gestire le richieste JSON
+app.use(express.json());
 
 // Aggiungi una rotta di base per verificare che il server funzioni
-fastify.get('/', async (request, reply) => {
-    reply.send('Backend attivo');
+app.get('/', (req, res) => {
+  res.send('Backend attivo');
 });
 
-// Registra le rotte
-fastify.register(articleRoutes, { prefix: '/api' });
-fastify.register(authorRoutes, { prefix: '/api' });
-fastify.register(workRoutes, { prefix: '/api' });
-fastify.register(literatureRoutes, { prefix: '/api' });
-fastify.register(historySectionRoutes, { prefix: '/api' });
+// Usa le rotte degli articoli
+app.use('/api', articleRoutes);
+
+// Usa le rotte degli autori
+app.use('/api', authorRoutes);
+
+// Usa le rotte delle opere
+app.use('/api', workRoutes);
+
+// Usa le rotte delle relazioni letterarie
+app.use('/api', literatureRoutes);
+
+// Usa le rotte delle sezioni storiche
+app.use('/api', historySectionRoutes);
 
 // Gestisci le rotte non trovate (404)
-fastify.setNotFoundHandler((request, reply) => {
-    reply.status(404).send('Errore 404: Risorsa non trovata');
+app.use((req, res) => {
+  res.status(404).send('Errore 404: Risorsa non trovata');
 });
 
+// Rimuovi app.listen(), perché Vercel gestisce la porta
 // Esporta la funzione handler per Vercel
-export default async (req: any, res: any) => {
-    await fastify.ready();
-    fastify.server.emit('request', req, res);
-};
+export default app;
