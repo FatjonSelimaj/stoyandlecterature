@@ -22,19 +22,19 @@ app.get('/', (req, res) => {
 });
 
 // Usa le rotte degli articoli
-app.use('/api/articles', articleRoutes);
+app.use('api/articles', articleRoutes);
 
 // Usa le rotte degli autori
-app.use('/api/authors', authorRoutes);
+app.use('api/authors', authorRoutes);
 
 // Usa le rotte delle opere
-app.use('/api/works', workRoutes);
+app.use('api/works', workRoutes);
 
 // Usa le rotte delle relazioni letterarie
-app.use('/api/literature', literatureRoutes);
+app.use('api/literature', literatureRoutes);
 
 // Usa le rotte delle sezioni storiche
-app.use('/api/history', historySectionRoutes);
+app.use('api/history', historySectionRoutes);
 
 // Gestisci le rotte non trovate (404)
 app.use((req, res) => {
